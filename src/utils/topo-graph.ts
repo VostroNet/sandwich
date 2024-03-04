@@ -1,0 +1,103 @@
+
+export class TopologicalGraph {
+  private adjacencyList: Map<number, number[]>;
+
+  constructor() {
+    this.adjacencyList = new Map<number, number[]>();
+  }
+
+  addVertex(vertex: number) {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, []);
+    }
+  }
+
+  addEdge(from: number, to: number) {
+    if (this.adjacencyList.has(from)) {
+      this.adjacencyList.get(from)?.push(to);
+    } else {
+      throw new Error(`Vertex ${from} does not exist in the graph.`);
+    }
+  }
+  topologicalSort(): number[] {
+    const indegree: Map<number, number> = new Map();
+    const queue: number[] = [];
+    const result: number[] = [];
+
+    // Calculate indegree for each vertex
+    for (const [vertex, neighbors] of this.adjacencyList) {
+      indegree.set(vertex, indegree.get(vertex) || 0);
+      for (const neighbor of neighbors) {
+        indegree.set(neighbor, (indegree.get(neighbor) || 0) + 1);
+      }
+    }
+
+    // Initialize the queue with vertices having indegree of 0
+    for (const vertex of indegree.keys()) {
+      if (indegree.get(vertex) === 0) {
+        queue.push(vertex);
+      }
+    }
+
+    // Topological sort using Kahn's algorithm
+    while (queue.length > 0) {
+      const vertex = queue.shift()!;
+      result.push(vertex);
+
+      const neighbors = this.adjacencyList.get(vertex) || [];
+      for (const neighbor of neighbors) {
+        indegree.set(neighbor, indegree.get(neighbor)! - 1);
+        if (indegree.get(neighbor) === 0) {
+          queue.push(neighbor);
+        }
+      }
+    }
+
+    if (result.length !== this.adjacencyList.size) {
+      throw new Error("Graph has a cycle. Topological sorting is not possible.");
+    }
+
+    return result;
+  }
+  // topologicalSort(): number[] {
+  //   const visited: Set<number> = new Set();
+  //   const stack: number[] = [];
+  //   const result: number[] = [];
+
+  //   const dfs = (vertex: number) => {
+  //     if (stack.includes(vertex)) {
+  //       throw new Error("Graph has a cycle. Topological sorting is not possible.");
+  //     }
+
+  //     if (!visited.has(vertex)) {
+  //       visited.add(vertex);
+  //       stack.push(vertex);
+
+  //       const neighbors = this.adjacencyList.get(vertex) || [];
+
+  //       for (const neighbor of neighbors) {
+  //         if (!visited.has(neighbor)) {
+  //           dfs(neighbor);
+  //         }
+  //       }
+
+  //       stack.pop();
+  //       result.unshift(vertex);
+  //     }
+  //   };
+
+  //   while (visited.size < this.adjacencyList.size) {
+  //     const unvisitedVertices = Array.from(this.adjacencyList.keys()).filter(
+  //       (vertex) => !visited.has(vertex)
+  //     );
+
+  //     if (unvisitedVertices.length === 0) {
+  //       throw new Error("Graph has a cycle. Topological sorting is not possible.");
+  //     }
+
+  //     dfs(unvisitedVertices[0]);
+  //   }
+
+  //   return result;
+  // }
+}
