@@ -104,7 +104,9 @@ export default class Loaf extends Chains implements ILoaf {
             });
           }
           this.logger.debug(`Adding crumb ${crumbName} from slice ${sliceName}`);
-          funcs.push(mod[crumbName]);
+          funcs.push((...args) => {
+            return mod[crumbName].apply(mod, [...args, mod]);
+          });
         }
       }
       this.push(crumbName, funcs);
