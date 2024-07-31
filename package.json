@@ -1,6 +1,6 @@
 {
   "name": "@vostro/sandwich",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "module": "lib/index.js",
   "main": "lib/cjs/index.js",
   "types": "lib/index.d.ts",
