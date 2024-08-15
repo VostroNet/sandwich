@@ -1,4 +1,5 @@
-
+// import debug from "debug";
+// const log = debug("sandwich:utils:topo-graph");
 export class TopologicalGraph {
   private adjacencyList: Map<number, number[]>;
 
@@ -54,7 +55,15 @@ export class TopologicalGraph {
     }
 
     if (result.length !== this.adjacencyList.size) {
-      throw new Error("Graph has a cycle. Topological sorting is not possible.");
+      // get missing vertices
+      const missingVertices = Array.from(this.adjacencyList.keys()).filter((vertex) => !result.includes(vertex));
+
+      throw new AdjacencyError({
+        message: "Graph has a cycle. Topological sorting is not possible.",
+        result,
+        adjacencyList: this.adjacencyList,
+        missingVertices,
+      });
     }
 
     return result;
@@ -100,4 +109,24 @@ export class TopologicalGraph {
 
   //   return result;
   // }
+}
+
+export interface AdjacencyErrorOpts {
+  message: string;
+  result: number[];
+  adjacencyList: Map<number, number[]>;
+  missingVertices: number[];
+}
+export class AdjacencyError extends Error {
+  result: number[];
+  adjacencyList: Map<number, number[]>
+  missingVertices: number[];
+  constructor(opts: AdjacencyErrorOpts) {
+    super(opts.message);
+    this.name = "AdjacencyError";
+    this.message = opts.message;
+    this.result = opts.result;
+    this.adjacencyList = opts.adjacencyList;
+    this.missingVertices = opts.missingVertices;
+  }
 }

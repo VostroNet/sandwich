@@ -4,7 +4,7 @@ import waterfall from "./utils/waterfall";
 import Loaf from "./loaf";
 import { createLogger } from "./utils/logger";
 import { v4 } from "uuid";
-import { TopologicalGraph } from "./utils/topo-graph";
+import { AdjacencyError, TopologicalGraph } from "./utils/topo-graph";
 
 const logger = createLogger("kitchen");
 export async function buildToast(sliceData: any, loaf: Loaf, cwd: string, currentIdx: number, clone = false) : Promise<Toast> {
@@ -127,8 +127,8 @@ export function sortArrayByDependencyInfo(moduleNames: string[], dependencyInfos
     g.addVertex(newModuleNames.indexOf(mname));
   }
   for (const depInfo of filtered) {
-    const before = [...depInfo.requiredBefore, ...depInfo.optionalBefore];
-    const after = [...depInfo.requiredAfter, ...depInfo.optionalAfter];
+    const before = [...depInfo.requiredBefore, ...depInfo.optionalBefore.filter((o) => moduleNames.indexOf(o) !== -1)];
+    const after = [...depInfo.requiredAfter, ...depInfo.optionalAfter.filter((o) => moduleNames.indexOf(o) !== -1)];
     const currentIdx = newModuleNames.indexOf(depInfo.moduleName);
     if (before.length > 0) {
       before.forEach((e) => {
@@ -145,11 +145,35 @@ export function sortArrayByDependencyInfo(moduleNames: string[], dependencyInfos
       });
     }
   }
-  const sortedIndexes = g.topologicalSort();
+  let sortedIndexes: number[];
+  try {
+    sortedIndexes = g.topologicalSort();
+  } catch(e: any) {
+    if (e instanceof AdjacencyError) {
+      console.error(e.message);
+      console.error("Result Map: ")
+      console.error(JSON.stringify(e.result.map((i) => newModuleNames[i]), null, 2));
+      console.error("Adjacency List: ")
+      const convertedList = convertAdjacencyListToNamed(e.adjacencyList, newModuleNames);
+      console.error(JSON.stringify(Array.from(convertedList.entries()), null, 2));
+      console.error("Missing Modules: ")
+      console.error(JSON.stringify(e.missingVertices.map((i) => newModuleNames[i]), null, 2));
+
+    }
+    throw e;
+  }
   const sortedModules = sortedIndexes.map((i) => newModuleNames[i]);
   // console.log("Topological Sorting Order:", sortedModules);
 
   return sortedModules
+
+}
+function convertAdjacencyListToNamed(adjacencyList: Map<number, number[]>, moduleNames: string[]) : Map<string, string[]> {
+  const result = new Map<string, string[]>();
+  for (const [vertex, neighbors] of adjacencyList) {
+    result.set(moduleNames[vertex], neighbors.map((n) => moduleNames[n]));
+  }
+  return result;
 
 }
 
