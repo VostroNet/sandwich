@@ -1,25 +1,27 @@
 {
   "compilerOptions": {
     "lib": ["ESNext"],
-    "module": "esnext",
-    "target": "es2022",
-    "moduleResolution": "bundler",
+    "module": "Preserve",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
     "moduleDetection": "force",
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "composite": false,
     "strict": false,
-    "downlevelIteration": true,
+    // "downlevelIteration": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "types": [
-      "@types/node"
-    ],
-    
+    "esModuleInterop": true,
+    "types": ["@types/node"],
+
     "outDir": "lib/",
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    // "isolatedModules": true,
+    // "importsNotUsedAsValues": "remove",
+    // "importHelpers": true
   },
   
   "include": ["src/**/*"],
@@ -32,12 +34,9 @@
     // when they're updated a lot.
     "fallbackPolling": "dynamicPriority",
     // Don't coalesce watch notification
-    "synchronousWatchDirectory": true,
+    "synchronousWatchDirectory": true
     // Finally, two additional settings for reducing the amount of possible
     // files to track  work from these directories
     // "excludeFiles": ["node_modules/**/*", "lib/**/*"]
-
-    
-  },
-
+  }
 }

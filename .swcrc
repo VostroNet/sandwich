@@ -1,0 +1,31 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "exclude": "node_modules/",
+  "jsc": {
+    "target": "es2022",
+    "parser": {
+      "syntax": "typescript"
+    }
+  },
+  "isModule": true,
+  "module": {
+    "type": "commonjs"
+  }
+}
+
+    // "externalHelpers": true,
+    // "target": "esnext",
+    // "baseUrl": "./src/",
+    // "experimental": {
+    //   "plugins": [
+    //     [
+    //       "@swc/plugin-transform-imports",
+    //       {
+    //         "^(.*?)(\\.ts)$": {
+    //           "skipDefaultConversion": false,
+    //           "transform": "{{matches.[1]}}.js"
+    //         }
+    //       }
+    //     ]
+    //   ]
+    // }
