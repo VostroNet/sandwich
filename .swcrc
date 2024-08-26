@@ -7,25 +7,9 @@
       "syntax": "typescript"
     }
   },
-  "isModule": true,
   "module": {
-    "type": "commonjs"
+    "type": "commonjs",
+    "lazy": false
+    
   }
 }
-
-    // "externalHelpers": true,
-    // "target": "esnext",
-    // "baseUrl": "./src/",
-    // "experimental": {
-    //   "plugins": [
-    //     [
-    //       "@swc/plugin-transform-imports",
-    //       {
-    //         "^(.*?)(\\.ts)$": {
-    //           "skipDefaultConversion": false,
-    //           "transform": "{{matches.[1]}}.js"
-    //         }
-    //       }
-    //     ]
-    //   ]
-    // }
