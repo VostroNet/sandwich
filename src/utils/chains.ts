@@ -42,12 +42,15 @@ export default class Chains {
       }
     }
   };
-  readonly sync = (eventName: string, start: any, ...args: readonly unknown[]) => {
-    if (!this.funcs[eventName]) {
+  readonly sync = <T>(eventName: string, start: any, ...args: readonly unknown[]) : T => {
+    return Chains.sync<T>(this, eventName, start, ...args);
+  }
+  static sync<T>(chains: Chains, eventName: string, start: any, ...args: readonly unknown[]) : T {
+    if (!chains.funcs[eventName]) {
       return start;
     }
-    const options = this.options[eventName];
-    return this.funcs[eventName].reduce((o, f) => {
+    const options = chains.options[eventName];
+    return chains.funcs[eventName].reduce((o, f) => {
       if (f instanceof Promise) {
         throw new Error('Cannot use sync with async functions');
       }
@@ -58,25 +61,38 @@ export default class Chains {
       return f(o, ...args);
     }, start);
   };
-  readonly all = async<T>(eventName: string, start: any, ...args: readonly unknown[]): Promise<T[]> =>  {
-    if (!this.funcs[eventName]) {
+  readonly all = async<T>(eventName: string, start: any, ...args: readonly unknown[]): Promise<T[]> => {
+    return Chains.all<T>(this, eventName, start, ...args);
+  };
+
+  static async all<T>(chains: Chains, eventName: string, start: any, ...args: readonly unknown[]): Promise<T[]> {
+    if (!chains.funcs[eventName]) {
       return [];
     }
-    return Promise.all(this.funcs[eventName].map((f) => {
+    return Promise.all(chains.funcs[eventName].map((f) => {
       return f(start, ...args);
     }));
   };
+
   readonly execute = async<T>(
     eventName: string,
     start: any,
     ...args: readonly unknown[]
   ) => {
-    if (!this.funcs[eventName]) {
+    return Chains.execute<T>(this, eventName, start, ...args);
+  };
+  static async execute<T>(
+    chains: Chains,
+    eventName: string,
+    start: any,
+    ...args: readonly unknown[]
+  ) {
+    if (!chains.funcs[eventName]) {
       return start;
     }
-    const options = this.options[eventName];
+    const options = chains.options[eventName];
     return waterfall<T>(
-      this.funcs[eventName] || [],
+      chains.funcs[eventName] || [],
       async(f, o) => {
         if (options?.ignoreReturn) {
           await f(start, ...args);
@@ -93,11 +109,20 @@ export default class Chains {
     start: T1 ,
     ...args: readonly unknown[]
   ) => {
-    if (!this.funcs[eventName]) {
+    return Chains.condition(this, eventName, conditionFunc, start, ...args);
+  }
+  static async condition<T1, T2>(
+    chains: Chains,
+    eventName: string,
+    conditionFunc: (o: T2) => Promise<boolean>,
+    start: T1 ,
+    ...args: readonly unknown[]
+  ) {
+    if (!chains.funcs[eventName]) {
       return start;
     }
-    const options = this.options[eventName];
-    const endResult = await waterfall<T1>(this.funcs[eventName] || [], async(f, o, i, brk) => {
+    const options = chains.options[eventName];
+    const endResult = await waterfall<T1>(chains.funcs[eventName] || [], async(f, o, i, brk) => {
       // if (brk) {
       //   return o;
       // }
