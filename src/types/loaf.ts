@@ -56,6 +56,7 @@ export interface ISlice extends SliceEvents  {
   readonly name: string;
   readonly dependencies?: (string | oneOf | DependencyInfo)[];
   readonly ignore?: string[];
+  readonly allow?: string[];
 
   // readonly models?: { [key: string]: any };
 }
@@ -76,6 +77,7 @@ export type Jam = {
   cwd?: string;
   devMode?: boolean;
   clone?: boolean
+  restrictCrumbs?: string[];
 };
 
 export type Logger = {

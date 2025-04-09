@@ -272,4 +272,110 @@ describe('Loaf', () => {
     expect(loaf.crumbs[LoafEvent.Ready].length).toBe(1);
     expect(loaf.crumbs[LoafEvent.Ready][0]).toBe("test2");
   });
+
+  it('restrict extra crumbs from being generated', async () => {
+    let l: string[] = [];
+    const loaf = new Loaf({
+      name: 'test', 
+      restrictCrumbs: [],
+      slices: [{
+        name: "test1",
+        dependencies: [],
+        [Loaf.Initialize]: async (loaf: Loaf) => {
+          l.push('initialize1');
+        },
+        ["warrgh"]: async (loaf: Loaf) => {
+          l.push('warrgh');
+        }
+
+      }]
+    });
+    
+    logger.debug("execution path", l);
+    await loaf.load();
+    expect(loaf.crumbs["warrgh"]).toBeUndefined();
+  });
+
+  it('restrict then allow crumbs getting generated', async () => {
+    let l: string[] = [];
+    const loaf = new Loaf({
+      name: 'test', 
+      restrictCrumbs: [],
+      slices: [{
+        name: "test1",
+        dependencies: [],
+        [Loaf.Initialize]: async (loaf: Loaf) => {
+          l.push('initialize1');
+        },
+        ["warrgh"]: async (loaf: Loaf) => {
+          l.push('warrgh');
+        },
+        ["warrgh2"]: async (loaf: Loaf) => {
+          l.push('warrgh2');
+        }
+
+      }]
+    });
+    loaf.allowCrumb("warrgh");
+    
+    logger.debug("execution path", l);
+    await loaf.load();
+    expect(loaf.crumbs["warrgh"]).not.toBeUndefined();
+    expect(loaf.crumbs["warrgh2"]).toBeUndefined();
+  });
+  it('restrict then allow then restrict crumbs from being generated', async () => {
+    let l: string[] = [];
+    const loaf = new Loaf({
+      name: 'test', 
+      restrictCrumbs: [],
+      slices: [{
+        name: "test1",
+        dependencies: [],
+        [Loaf.Initialize]: async (loaf: Loaf) => {
+          l.push('initialize1');
+        },
+        ["warrgh"]: async (loaf: Loaf) => {
+          l.push('warrgh');
+        },
+        ["warrgh2"]: async (loaf: Loaf) => {
+          l.push('warrgh2');
+        }
+
+      }]
+    });
+    loaf.allowCrumb("warrgh");
+    loaf.disallowCrumb("warrgh");
+    
+    logger.debug("execution path", l);
+    await loaf.load();
+    expect(loaf.crumbs["warrgh"]).toBeUndefined();
+    expect(loaf.crumbs["warrgh2"]).toBeUndefined();
+  });
+  it('using ISlice.allow to allow crumb while restriction is enabled', async () => {
+    let l: string[] = [];
+    const loaf = new Loaf({
+      name: 'test', 
+      restrictCrumbs: [],
+      slices: [{
+        name: "test1",
+        dependencies: [],
+        allow: ["warrgh"],
+        [Loaf.Initialize]: async (loaf: Loaf) => {
+          l.push('initialize1');
+        },
+        ["warrgh"]: async (loaf: Loaf) => {
+          l.push('warrgh');
+        },
+        ["warrgh2"]: async (loaf: Loaf) => {
+          l.push('warrgh2');
+        }
+
+      }]
+    });
+    
+    logger.debug("execution path", l);
+    await loaf.load();
+    expect(loaf.crumbs["warrgh"]).not.toBeUndefined();
+    expect(loaf.crumbs["warrgh2"]).toBeUndefined();
+  });
 });

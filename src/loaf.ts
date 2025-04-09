@@ -29,6 +29,7 @@ export default class Loaf extends Chains implements ILoaf {
   readonly jam: Jam;
   cwd: string;
   crumbs: {[key: string]: string[]} = {};
+  restrictCrumbs: string[] = [];
   constructor(jam: Jam) {
     super();
     this.name = "loaf";
@@ -39,6 +40,9 @@ export default class Loaf extends Chains implements ILoaf {
     this.setOptions(LoafEvent.Load, {
       ignoreReturn: true,
     });
+    if (jam.restrictCrumbs) {
+      this.restrictCrumbs = [...Object.values(LoafEvent), ...jam.restrictCrumbs];
+    }
   }
   static Load: LoafEvent.Load = LoafEvent.Load;
   static Initialize: LoafEvent.Initialize = LoafEvent.Initialize;
@@ -54,7 +58,15 @@ export default class Loaf extends Chains implements ILoaf {
     await this.ready();
   };
 
+  readonly allowCrumb = (crumbName: string) => {
+    this.restrictCrumbs.push(crumbName);
+  }
+  readonly disallowCrumb = (crumbName: string) => {
+    this.restrictCrumbs = this.restrictCrumbs.filter((name) => name !== crumbName);
+  }
+
   readonly load = async () => {
+    const limitCrumbs = (this.restrictCrumbs || []).length > 0;
     this.logger.debug(this.name, "Cooking the toast...");
     this.slices = await importAndCreateToast(this.jam, this);
     
@@ -69,10 +81,16 @@ export default class Loaf extends Chains implements ILoaf {
         // Execute the Load Event
         await slice[LoafEvent.Load](this, slice);
       }
+      if (slice.allow) {
+        this.restrictCrumbs = [...this.restrictCrumbs, ...slice.allow.filter((name) => this.restrictCrumbs.indexOf(name) === -1)];
+      }
       if (slice.dependencyInfos) {
         dependencyInfos = dependencyInfos.concat(slice.dependencyInfos);
       }
       for (const crumbName of slice.crumbNames) {
+        if (limitCrumbs && this.restrictCrumbs.indexOf(crumbName) === -1) {
+          continue;
+        }
         if (crumbNames.indexOf(crumbName) === -1) {
           this.logger.debug(this.name, `Adding crumb ${crumbName} from slice ${sliceName}`, slice.crumbNames);
           crumbNames.push(crumbName);
