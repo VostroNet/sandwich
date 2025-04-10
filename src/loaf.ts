@@ -29,7 +29,7 @@ export default class Loaf extends Chains implements ILoaf {
   readonly jam: Jam;
   cwd: string;
   crumbs: {[key: string]: string[]} = {};
-  restrictCrumbs: string[] = [];
+  allowCrumbNames: string[] = [];
   constructor(jam: Jam) {
     super();
     this.name = "loaf";
@@ -40,9 +40,8 @@ export default class Loaf extends Chains implements ILoaf {
     this.setOptions(LoafEvent.Load, {
       ignoreReturn: true,
     });
-    if (jam.restrictCrumbs) {
-      this.restrictCrumbs = [...Object.values(LoafEvent), ...jam.restrictCrumbs];
-    }
+    this.allowCrumbNames = [...Object.values(LoafEvent), ...jam.crumbNames || []];
+    
   }
   static Load: LoafEvent.Load = LoafEvent.Load;
   static Initialize: LoafEvent.Initialize = LoafEvent.Initialize;
@@ -59,14 +58,14 @@ export default class Loaf extends Chains implements ILoaf {
   };
 
   readonly allowCrumb = (crumbName: string) => {
-    this.restrictCrumbs.push(crumbName);
+    this.allowCrumbNames.push(crumbName);
   }
   readonly disallowCrumb = (crumbName: string) => {
-    this.restrictCrumbs = this.restrictCrumbs.filter((name) => name !== crumbName);
+    this.allowCrumbNames = this.allowCrumbNames.filter((name) => name !== crumbName);
   }
 
   readonly load = async () => {
-    const limitCrumbs = (this.restrictCrumbs || []).length > 0;
+    Object.freeze(this.allowCrumbNames)
     this.logger.debug(this.name, "Cooking the toast...");
     this.slices = await importAndCreateToast(this.jam, this);
     
@@ -81,14 +80,12 @@ export default class Loaf extends Chains implements ILoaf {
         // Execute the Load Event
         await slice[LoafEvent.Load](this, slice);
       }
-      if (slice.allow) {
-        this.restrictCrumbs = [...this.restrictCrumbs, ...slice.allow.filter((name) => this.restrictCrumbs.indexOf(name) === -1)];
-      }
       if (slice.dependencyInfos) {
         dependencyInfos = dependencyInfos.concat(slice.dependencyInfos);
       }
       for (const crumbName of slice.crumbNames) {
-        if (limitCrumbs && this.restrictCrumbs.indexOf(crumbName) === -1) {
+
+        if (this.allowCrumbNames.indexOf(crumbName) === -1 && (slice.allow || []).indexOf(crumbName) === -1) {
           continue;
         }
         if (crumbNames.indexOf(crumbName) === -1) {

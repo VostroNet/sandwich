@@ -77,7 +77,7 @@ export type Jam = {
   cwd?: string;
   devMode?: boolean;
   clone?: boolean
-  restrictCrumbs?: string[];
+  crumbNames?: string[];
 };
 
 export type Logger = {

@@ -277,7 +277,7 @@ describe('Loaf', () => {
     let l: string[] = [];
     const loaf = new Loaf({
       name: 'test', 
-      restrictCrumbs: [],
+      crumbNames: [],
       slices: [{
         name: "test1",
         dependencies: [],
@@ -300,7 +300,7 @@ describe('Loaf', () => {
     let l: string[] = [];
     const loaf = new Loaf({
       name: 'test', 
-      restrictCrumbs: [],
+      crumbNames: [],
       slices: [{
         name: "test1",
         dependencies: [],
@@ -327,7 +327,7 @@ describe('Loaf', () => {
     let l: string[] = [];
     const loaf = new Loaf({
       name: 'test', 
-      restrictCrumbs: [],
+      crumbNames: [],
       slices: [{
         name: "test1",
         dependencies: [],
@@ -355,7 +355,7 @@ describe('Loaf', () => {
     let l: string[] = [];
     const loaf = new Loaf({
       name: 'test', 
-      restrictCrumbs: [],
+      crumbNames: [],
       slices: [{
         name: "test1",
         dependencies: [],
