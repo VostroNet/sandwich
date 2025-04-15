@@ -43,14 +43,8 @@ export async function buildToast(sliceData: any, loaf: Loaf, cwd: string, curren
   
   newMod.dependencyInfos = getDependencyInfos(newMod);
   loaf.logger.debug("importAndCreateToast - dependencyInfo ", newMod.dependencyInfos);
-  newMod.crumbNames = Object.keys(newMod).filter(
-    (key) => typeof (newMod as ISlice)[key as keyof ISlice] === "function"
-      || [
-        "name",
-        "dependencies",
-        "dependencyInfos",
-        "id",
-      ...(newMod.ignore || [])].indexOf(key) === -1
+  newMod.crumbNames = Object.keys(newMod).filter((key) => 
+    (loaf.allowCrumbNames.includes(key) || newMod.allow?.includes(key)) && !newMod.ignore?.includes(key)
   );
   return newMod;
 }

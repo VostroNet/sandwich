@@ -378,4 +378,33 @@ describe('Loaf', () => {
     expect(loaf.crumbs["warrgh"]).not.toBeUndefined();
     expect(loaf.crumbs["warrgh2"]).toBeUndefined();
   });
+
+  it('using ISlice.allow and ignore should take priority for excluding a crumb', async () => {
+    let l: string[] = [];
+    const loaf = new Loaf({
+      name: 'test', 
+      crumbNames: [],
+      slices: [{
+        name: "test1",
+        dependencies: [],
+        allow: ["warrgh", "warrgh2"],
+        ignore: ["warrgh2"],
+        [Loaf.Initialize]: async (loaf: Loaf) => {
+          l.push('initialize1');
+        },
+        ["warrgh"]: async (loaf: Loaf) => {
+          l.push('warrgh');
+        },
+        ["warrgh2"]: async (loaf: Loaf) => {
+          l.push('warrgh2');
+        }
+
+      }]
+    });
+    
+    logger.debug("execution path", l);
+    await loaf.load();
+    expect(loaf.crumbs["warrgh"]).not.toBeUndefined();
+    expect(loaf.crumbs["warrgh2"]).toBeUndefined();
+  });
 });
