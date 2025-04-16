@@ -76,7 +76,7 @@ export default class Chains {
 
   readonly execute = async<T>(
     eventName: string,
-    start: any,
+    start?: any,
     ...args: readonly unknown[]
   ) => {
     return Chains.execute<T>(this, eventName, start, ...args);

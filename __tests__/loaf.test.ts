@@ -1,4 +1,4 @@
-import {describe, it, expect} from "@jest/globals";
+import { describe, it, expect } from "@jest/globals";
 import Loaf from "../src/loaf";
 import { createLogger } from "../src/utils/logger";
 import { ISlice, LoafEvent } from "../src/types/loaf";
@@ -8,13 +8,13 @@ describe('Loaf', () => {
     expect(Loaf).toBeDefined();
   });
   it('should be a class', () => {
-    const loaf = new Loaf({name: 'test', slices: []});
+    const loaf = new Loaf({ name: 'test', slices: [] });
     expect(loaf).toBeInstanceOf(Loaf);
   });
   it('basic slice - testing load event', async () => {
     let l = 0;
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       slices: [{
         name: "slice1",
         [Loaf.Load]: async (loaf: Loaf, slice: ISlice) => {
@@ -27,34 +27,36 @@ describe('Loaf', () => {
   });
   it('basic slice - testing order of eventa', async () => {
     const l: string[] = [];
-    const loaf = new Loaf({name: 'test', slices: [{
-      name: "slice1",
-      [Loaf.Load]: async (loaf: Loaf) => {
-        l.push('load');
-      },
-      [Loaf.Initialize]: async (loaf: Loaf) => {
-        l.push('initialize');
-        return loaf;
-      },
-      [Loaf.Ready]: async (loaf: Loaf) => {
-        l.push('ready');
-        return loaf;
-      },
-      [Loaf.Shutdown]: async (loaf: Loaf) => {
-        l.push('shutdown');
-        return loaf;
-      }
-    }]});
+    const loaf = new Loaf({
+      name: 'test', slices: [{
+        name: "slice1",
+        [Loaf.Load]: async (loaf: Loaf) => {
+          l.push('load');
+        },
+        [Loaf.Initialize]: async (loaf: Loaf) => {
+          l.push('initialize');
+          return loaf;
+        },
+        [Loaf.Ready]: async (loaf: Loaf) => {
+          l.push('ready');
+          return loaf;
+        },
+        [Loaf.Shutdown]: async (loaf: Loaf) => {
+          l.push('shutdown');
+          return loaf;
+        }
+      }]
+    });
     await loaf.start();
     await loaf.shutdown();
     logger.debug("execution path", l);
     expect(l).toEqual(['load', 'initialize', 'ready', 'shutdown']);
   });
-  
+
   it('basic slice - testing order of events', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       slices: [{
         name: "test1",
         [Loaf.Load]: async (loaf: Loaf) => {
@@ -99,7 +101,7 @@ describe('Loaf', () => {
   it('basic slice - testing order of events - with dependencies', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       slices: [{
         name: "test1",
         dependencies: ["test2"],
@@ -144,7 +146,7 @@ describe('Loaf', () => {
   it('complex slice reqs - independent function reordering', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       slices: [{
         name: "test2",
         dependencies: ["test1"],
@@ -203,7 +205,7 @@ describe('Loaf', () => {
         }
       }]
     });
-    
+
     logger.debug("execution path", l);
     await loaf.load();
     await loaf.initialize();
@@ -240,7 +242,7 @@ describe('Loaf', () => {
   it('ensuring crumbs only hold the modules that have the functions', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       slices: [{
         name: "test1",
         dependencies: [],
@@ -252,7 +254,7 @@ describe('Loaf', () => {
         dependencies: [],
         [Loaf.Initialize]: async (loaf: Loaf) => {
           l.push('initialize2');
-        }, 
+        },
         [Loaf.Ready]: async (loaf: Loaf) => {
           l.push('ready2');
         }
@@ -264,7 +266,7 @@ describe('Loaf', () => {
         },
       }]
     });
-    
+
     logger.debug("execution path", l);
     await loaf.load();
 
@@ -276,7 +278,7 @@ describe('Loaf', () => {
   it('restrict extra crumbs from being generated', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       crumbNames: [],
       slices: [{
         name: "test1",
@@ -290,7 +292,7 @@ describe('Loaf', () => {
 
       }]
     });
-    
+
     logger.debug("execution path", l);
     await loaf.load();
     expect(loaf.crumbs["warrgh"]).toBeUndefined();
@@ -299,7 +301,7 @@ describe('Loaf', () => {
   it('restrict then allow crumbs getting generated', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       crumbNames: [],
       slices: [{
         name: "test1",
@@ -317,7 +319,7 @@ describe('Loaf', () => {
       }]
     });
     loaf.allowCrumb("warrgh");
-    
+
     logger.debug("execution path", l);
     await loaf.load();
     expect(loaf.crumbs["warrgh"]).not.toBeUndefined();
@@ -326,7 +328,7 @@ describe('Loaf', () => {
   it('restrict then allow then restrict crumbs from being generated', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       crumbNames: [],
       slices: [{
         name: "test1",
@@ -345,7 +347,7 @@ describe('Loaf', () => {
     });
     loaf.allowCrumb("warrgh");
     loaf.disallowCrumb("warrgh");
-    
+
     logger.debug("execution path", l);
     await loaf.load();
     expect(loaf.crumbs["warrgh"]).toBeUndefined();
@@ -354,7 +356,7 @@ describe('Loaf', () => {
   it('using ISlice.allow to allow crumb while restriction is enabled', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       crumbNames: [],
       slices: [{
         name: "test1",
@@ -372,17 +374,17 @@ describe('Loaf', () => {
 
       }]
     });
-    
+
     logger.debug("execution path", l);
     await loaf.load();
     expect(loaf.crumbs["warrgh"]).not.toBeUndefined();
     expect(loaf.crumbs["warrgh2"]).toBeUndefined();
   });
 
-  it('using ISlice.allow and ignore should take priority for excluding a crumb', async () => {
+  it('using ISlice.ignore should only affect this slice', async () => {
     let l: string[] = [];
     const loaf = new Loaf({
-      name: 'test', 
+      name: 'test',
       crumbNames: [],
       slices: [{
         name: "test1",
@@ -391,20 +393,57 @@ describe('Loaf', () => {
         ignore: ["warrgh2"],
         [Loaf.Initialize]: async (loaf: Loaf) => {
           l.push('initialize1');
+          await loaf.execute("warrgh", loaf);
         },
         ["warrgh"]: async (loaf: Loaf) => {
           l.push('warrgh');
+          await loaf.execute("warrgh2", loaf);
         },
         ["warrgh2"]: async (loaf: Loaf) => {
           l.push('warrgh2');
         }
 
       }]
-    });
-    
-    logger.debug("execution path", l);
+    },);
+
     await loaf.load();
-    expect(loaf.crumbs["warrgh"]).not.toBeUndefined();
-    expect(loaf.crumbs["warrgh2"]).toBeUndefined();
+    await loaf.initialize();
+    expect(l.includes("initialize1")).toBeTruthy();
+    expect(l.includes("warrgh")).toBeTruthy();
+    expect(l.includes("warrgh2")).not.toBeTruthy();
+  });
+
+  it('using ISlice.allow should affect all slices', async () => {
+    let l: string[] = [];
+    const loaf = new Loaf({
+      name: 'test',
+      crumbNames: [],
+      slices: [{
+        name: "test1",
+        dependencies: [],
+        allow: ["warrgh", "warrgh2"],
+        [Loaf.Initialize]: async (loaf: Loaf) => {
+          l.push('initialize1');
+          await loaf.execute("warrgh", loaf);
+        },
+
+      }, {
+        name: "test2",
+        dependencies: [],
+        ["warrgh"]: async (loaf: Loaf) => {
+          l.push('warrgh');
+          await loaf.execute("warrgh2", loaf);
+        },
+        ["warrgh2"]: async (loaf: Loaf) => {
+          l.push('warrgh2');
+        }
+      }]
+    },);
+
+    await loaf.load();
+    await loaf.initialize();
+    expect(l.includes("initialize1")).toBeTruthy();
+    expect(l.includes("warrgh")).toBeTruthy();
+    expect(l.includes("warrgh2")).toBeTruthy();
   });
 });

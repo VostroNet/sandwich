@@ -2,7 +2,10 @@ import type { Config } from 'jest';
 
 const config: Config = {
   verbose: true,
-  preset: 'ts-jest',
+  transform: {
+    '^.+\\.(t|j)sx?$': '@swc/jest',
+  },
+  
   testEnvironment: 'node',
   collectCoverageFrom: [
     '**/*.{ts,tsx}',

@@ -63,7 +63,7 @@ export interface ISlice extends SliceEvents  {
 
 export interface Toast extends ISlice, SliceFunctionIterable {
   id: string;
-  crumbNames: string[];
+  crumbNames?: string[];
   dependencyInfos: DependencyInfo[];
 }
 export type Slices = {
